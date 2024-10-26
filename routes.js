@@ -21,6 +21,10 @@ router.post('/generate-playlist', async (req, res) => {
     }
 });
 
+router.get('health', (req, res) => {
+    res.status(200).json({ message: 'Server is running' });
+});
+
 router.get('/prompt-test', async (req, res) => {
     try {
         const mood = req.query.mood;
