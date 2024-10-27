@@ -18,6 +18,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "groq-sdk": "^0.7.0",
-    "spotify-web-api-node": "^5.0.2"
+    "spotify-web-api-node": "^5.0.2",
+    "ytmusic-api": "^5.2.2"
   }
 }

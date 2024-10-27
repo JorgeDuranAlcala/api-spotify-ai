@@ -2,6 +2,21 @@ const express = require('express');
 const router = express.Router();
 const spotify = require('./utils/spotify');
 const llm = require('./utils/llm');
+const YTMusic = require("ytmusic-api")
+
+
+router.get('/music/:query', async (req, res) => {
+
+    const query = req.params.query;
+
+const ytmusic = new YTMusic()
+await ytmusic.initialize(/* Optional: Custom cookies */)
+
+    const results = await ytmusic.searchSongs(query)
+    res.send({
+        results
+    });
+});
 
 router.post('/generate-playlist', async (req, res) => {
     try {
