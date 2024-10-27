@@ -22,4 +22,4 @@ app.listen(port, () => {
  port ${port}`);
 });
 
-export default app;
+module.exports = app
