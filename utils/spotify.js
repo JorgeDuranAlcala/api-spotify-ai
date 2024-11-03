@@ -88,5 +88,17 @@ module.exports = {
         } catch (error) {
             throw error
         }
+    },
+    search: async (query, accessToken) => {
+        try {
+            spotifyApi.setAccessToken(accessToken);
+            const searchResult = await spotifyApi.search(query, ['track'], { limit: 30 });
+
+            return searchResult;
+        } catch (error) {
+            // Handle errors, including token expiration
+            throw error
+        }
     }
+
 };

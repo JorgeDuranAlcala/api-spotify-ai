@@ -21,8 +21,15 @@ await ytmusic.initialize(/* Optional: Custom cookies */)
 router.post('/generate-playlist', async (req, res) => {
     try {
         const mood = req.body.mood;
+        const artist = req.body.artist;
         const accessToken = req.body.accessToken;
-        const response = await llm.generatePrompt(mood);
+        let response;
+        if (mood) {
+            response = await llm.generatePrompt(mood);
+        }
+        else if (artist) {
+            response = await llm.generateArtistPlaylistPrompt(artist);
+        }
         const songTypes = llm.extractSongTypes(response);
         const playlist = await spotify.createPlaylist(songTypes, accessToken);
         res.json({ playlist: playlist.trackUris, songTypes: playlist.songTypes });
@@ -44,6 +51,23 @@ router.get('/prompt-test', async (req, res) => {
     try {
         const mood = req.query.mood;
         const response = await llm.generatePrompt(mood);
+        const playlistLines = response.split('\n');
+        const songs = playlistLines.map(line => line.trim());
+        const regex = /^\d+\./;
+        const filteredSongs = songs.filter(song => regex.test(song));
+
+
+        res.json({ prompt: response, songs, filteredSongs });;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred', details: error.message });
+    }
+});
+
+router.get('/prompt-artist-test', async (req, res) => {
+    try {
+        const artist = req.query.artist;
+        const response = await llm.generateArtistPlaylistPrompt(artist);
         const playlistLines = response.split('\n');
         const songs = playlistLines.map(line => line.trim());
         const regex = /^\d+\./;

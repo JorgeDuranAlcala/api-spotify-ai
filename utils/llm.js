@@ -22,5 +22,17 @@ module.exports = {
             model: "llama3-8b-8192",
         });
         return completion.choices[0].message.content;
+      },
+      generateArtistPlaylistPrompt: async (artistName) => {
+        const completion = await groq.chat.completions.create({
+          messages: [
+            {
+              role: "user",
+              content: `Create a playlist of 50 songs that were made by this artist ${artistName}.`,
+            },
+          ],
+          model: "llama3-8b-8192",
+      });
+      return completion.choices[0].message.content;
       }
 }
