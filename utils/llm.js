@@ -11,6 +11,14 @@ module.exports = {
 
         return filteredSongs;
       },
+      extractSongNames(prompt) {
+        const playlistLines = prompt.content.split('\n');
+        const songs = playlistLines.map(line => line.trim());
+        const regex = /^\d+\./;
+        const filteredSongs = songs.filter(song => regex.test(song));
+
+        return filteredSongs.map(song => song.replace(/\d+\./, prompt.artistName));
+      },
       generatePrompt: async (mood) => {
         const completion = await groq.chat.completions.create({
             messages: [
@@ -33,6 +41,6 @@ module.exports = {
           ],
           model: "llama3-8b-8192",
       });
-      return completion.choices[0].message.content;
+      return {content: completion.choices[0].message.content, artistName};
       }
 }

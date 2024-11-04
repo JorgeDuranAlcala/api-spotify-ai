@@ -65,6 +65,30 @@ module.exports = {
             throw error
         }
     },
+
+    createPlaylistBySongNames: async (songNames, accessToken) => {
+        try {
+            spotifyApi.setAccessToken(accessToken);
+            const songs = songNames.slice(0, 20);
+            const trackUris = [];
+            for (const songName of songs) {
+                console.log(songName)
+                const searchResult = await spotifyApi.search(songName, ['track'], { limit: 3 });
+                if (searchResult.body.tracks.items.length > 0) {
+                    searchResult.body.tracks.items.forEach(track => {
+                        if (!trackUris.some(existingTrack => existingTrack.name === track.name)) {
+                            trackUris.push(track);
+                        }
+                    });
+                }
+            }
+
+            return {trackUris, songNames};
+        } catch (error) {
+            throw error;
+        }
+    },    
+
     savePlaylist: async (songTypes, trackUris, accessToken) => {
         try {
             spotifyApi.setAccessToken(accessToken);

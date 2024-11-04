@@ -23,16 +23,19 @@ router.post('/generate-playlist', async (req, res) => {
         const mood = req.body.mood;
         const artist = req.body.artist;
         const accessToken = req.body.accessToken;
-        let response;
         if (mood) {
-            response = await llm.generatePrompt(mood);
+            const response = await llm.generatePrompt(mood);
+            const songTypes = llm.extractSongTypes(response);
+            const playlist = await spotify.createPlaylist(songTypes, accessToken);
+            res.json({ playlist: playlist.trackUris, songTypes: playlist.songTypes });
         }
         else if (artist) {
-            response = await llm.generateArtistPlaylistPrompt(artist);
+            const response = await llm.generateArtistPlaylistPrompt(artist);
+            const songNames = llm.extractSongNames(response);
+            const playlist = await spotify.createPlaylistBySongNames(songNames, accessToken);
+            res.json({ playlist: playlist.trackUris, songNames: playlist.songNames });
         }
-        const songTypes = llm.extractSongTypes(response);
-        const playlist = await spotify.createPlaylist(songTypes, accessToken);
-        res.json({ playlist: playlist.trackUris, songTypes: playlist.songTypes });
+
     } catch (error) {
         console.error(error);
         if(error.statusCode === 401) {
@@ -54,7 +57,7 @@ router.get('/prompt-test', async (req, res) => {
         const playlistLines = response.split('\n');
         const songs = playlistLines.map(line => line.trim());
         const regex = /^\d+\./;
-        const filteredSongs = songs.filter(song => regex.test(song));
+        const filteredSongs = songs.filter(song => regex.test(song))
 
 
         res.json({ prompt: response, songs, filteredSongs });;
@@ -68,13 +71,13 @@ router.get('/prompt-artist-test', async (req, res) => {
     try {
         const artist = req.query.artist;
         const response = await llm.generateArtistPlaylistPrompt(artist);
-        const playlistLines = response.split('\n');
+        const playlistLines = response.content.split('\n');
         const songs = playlistLines.map(line => line.trim());
         const regex = /^\d+\./;
-        const filteredSongs = songs.filter(song => regex.test(song));
+        const filteredSongs = songs.filter(song => regex.test(song)).map(song => song.replace(/\d+\./, response.artistName));
 
 
-        res.json({ prompt: response, songs, filteredSongs });;
+        res.json({ prompt: response.content, songs, filteredSongs });;
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'An error occurred', details: error.message });
