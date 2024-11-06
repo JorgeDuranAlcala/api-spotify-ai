@@ -4,6 +4,18 @@ const spotify = require('./utils/spotify');
 const llm = require('./utils/llm');
 const YTMusic = require("ytmusic-api")
 
+router.get('/login', (req, res) => {
+    const authUrl = spotify.getAuthUrl();
+    res.redirect(authUrl);
+})
+
+router.get('/callback', async (req, res) => {
+    const code = req.query.code;
+    const { access_token, refresh_token, expires_in } = await spotify.getAccessToken(code);
+    //return res.json({ access_token, refresh_token, expires_in });
+    res.redirect(CLIENT_DOMAIN + '/callback?access_token=' + access_token + '&refresh_token=' + refresh_token + '&expires_in=' + expires_in);
+});
+
 
 router.get('/music/:query', async (req, res) => {
 

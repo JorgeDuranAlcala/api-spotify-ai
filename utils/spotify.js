@@ -8,6 +8,21 @@ const spotifyApi = new SpotifyWebApi({
 });
 
 module.exports = {
+    getAuthUrl: () => {
+        const scopes = ['user-read-private', 'user-read-email', 'user-top-read'];
+        const authUrl = spotifyApi.createAuthorizeURL(scopes);
+        return authUrl;
+    },
+    getAccessToken: async (code) => {
+        try {
+            const response = await spotifyApi.authorizationCodeGrant(code);
+            const { access_token, refresh_token, expires_in } = response.body;
+            return { access_token, refresh_token, expires_in };
+        } catch (error) {
+            console.error('Error getting access token:', error);
+            throw error;
+        }
+    },
     refreshAccessToken: async (refreshToken) => {
         try {
             spotifyApi.setRefreshToken(refreshToken);
