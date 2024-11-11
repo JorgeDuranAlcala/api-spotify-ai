@@ -42,11 +42,11 @@ module.exports = {
             const topTracks = await spotifyApi.getMyTopTracks({ limit: 5 });
 
             return topTracks.body.items.map((track) => ({
-                name: track.name,
-                artist: track.artists[0].name,
-                album: track.album.name,
-                image: track.album.images[0].url,
-                previewUrl: track.preview_url,
+                name: track?.name,
+                artist: track?.artists[0]?.name,
+                album: track?.album?.name,
+                image: track?.album.images[0].url,
+                previewUrl: track?.preview_url,
             }));
         } catch (error) {
             // Handle errors, including token expiration
@@ -91,18 +91,18 @@ module.exports = {
                 const searchResult = await spotifyApi.search(songName, ['track'], { limit: 3 });
                 if (searchResult.body.tracks.items.length > 0) {
                     searchResult.body.tracks.items.forEach(track => {
-                        if (!trackUris.some(existingTrack => existingTrack.name === track.name)) {
+                        if (track && track.name && !trackUris.some(existingTrack => existingTrack && existingTrack.name === track.name)) {
                             trackUris.push(track);
                         }
                     });
                 }
             }
-
+    
             return {trackUris, songNames};
         } catch (error) {
             throw error;
         }
-    },    
+    },  
 
     savePlaylist: async (songTypes, trackUris, accessToken) => {
         try {
